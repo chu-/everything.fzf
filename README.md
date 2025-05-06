@@ -48,6 +48,10 @@ brew install bash ruby bat chrome-cli figlet gh mise ripgrep
 Scripts
 -------
 
+### [_apps_](https://www.apple.com/macos)[.fzf](apps.fzf)
+
+* Select macOS applications to open
+
 ### [_chrome_](https://www.google.com/chrome/)[.fzf](chrome.fzf)
 
 * `chrome.fzf [t|h|b]`
