@@ -40,7 +40,7 @@ end
 # Jira meets fzf
 class JiraFzf
   COLUMNS = ENV.fetch('FZF_PREVIEW_COLUMNS', 80).to_i
-  SEPARATOR = "\n#{'-' * COLUMNS}\n\n".freeze
+  SEPARATOR = "\n#{'━' * COLUMNS}\n\n".freeze
 
   def initialize
     @options = { lines: 10, limit: 1000, query: '', color: true }
@@ -61,17 +61,14 @@ class JiraFzf
       opts.on('--limit=MAX_ITEMS', 'Maximum number of items to fetch') do |v|
         @options[:limit] = [0, v.to_i].max
       end
-      opts.on('--print=ISSUE', '(for preview) Print issue description') do |v|
+      opts.on('--print=ISSUE', '(for preview) Print issue description and comments') do |v|
         @options[:print] = v
-      end
-      opts.on('--print-comments=ISSUE', '(for preview) Print comments for the issue') do |v|
-        @options[:comments] = v
       end
       opts.on('--no-color', 'Disable colored output') do |v|
         @options[:color] = false
       end
       opts.parse!
-      abort(opts.help) if ARGV.length < (@options[:comments] ? 1 : 2)
+      abort(opts.help) if ARGV.length < (@options[:print] ? 1 : 2)
     end
 
     @url, *args = ARGV
@@ -93,10 +90,10 @@ class JiraFzf
   def run
     Ansi256.enabled = @options[:color]
     issue = @options[:print]
-    issue_comments = @options[:comments]
-    if issue || issue_comments
-      issue&.then { print_issue(it) }
-      issue_comments&.then { print_comments(it) }
+    if issue
+      print_issue(issue)
+      puts SEPARATOR
+      print_comments(issue)
     else
       Open3.popen2(fzf) do |stdin, _stdout|
         $stdout = stdin
@@ -114,7 +111,7 @@ class JiraFzf
     }
     paged('/rest/api/2/search', params) do |result|
       result[:issues].each do |issue|
-        print_issue_formatted(issue, @options[:lines])
+        print_issue_formatted(issue, head: @options[:lines])
         print "\x0"
       end
     end
@@ -122,7 +119,8 @@ class JiraFzf
 
   def print_issue(id)
     issue = get_path("/rest/api/2/issue/#{id}")
-    print_issue_formatted(issue)
+    print_issue_formatted(issue, separator: true, fn: :itself)
+    puts
   end
 
   def print_comments(id)
@@ -133,7 +131,7 @@ class JiraFzf
         idx += 1
         comment => { author: { displayName: }, body:, created: }
         puts("[#{idx}/#{total}] #{displayName.blue} #{format_time(created).magenta}")
-        puts(body.each_line.map { it.chomp.dim })
+        puts(body.each_line.map { it.chomp })
         puts SEPARATOR
       end
     end
@@ -147,19 +145,19 @@ class JiraFzf
       fzf --ansi --read0 --multi --info inline-right --reverse --scheme history \\
           --highlight-line --height 100% --wrap --wrap-sign '  ↳ ' \\
           --gap --border --border-label " "#{@jql.shellescape}" " \\
-          --header '╱ CTRL-Y: Copy to clipboard ╱ CTRL-V: View ╱ CTRL-/: Toggle comments ╱' \\
+          --header '╱ CTRL-Y: Copy to clipboard ╱ CTRL-V: View ╱ CTRL-/: Toggle preview ╱' \\
           --header-border bottom \\
           --query #{@options[:query].shellescape} \\
           --preview-window hidden,wrap \\
-          --preview 'ruby #{__FILE__.shellescape} #{auth} #{@url} --print-comments={1}' \\
+          --preview 'ruby #{__FILE__.shellescape} #{auth} #{@url} --print={1}' \\
           --bind ctrl-/:toggle-preview \\
           --bind 'enter:execute-silent(for key in {+1}; do open #{@url}/browse/$key; done)+clear-selection' \\
           --bind 'ctrl-y:execute-silent(echo -n {+1} | pbcopy)+clear-selection+bell' \\
-          --bind 'ctrl-v:execute:ruby #{__FILE__.shellescape} #{auth} #{@url} --print={1} --print-comments={1} --no-color | view - --not-a-term +"setf jira"'
+          --bind 'ctrl-v:execute:ruby #{__FILE__.shellescape} #{auth} #{@url} --print={1} --no-color | view - --not-a-term +"setf jira"'
     CMD
   end
 
-  def print_issue_formatted(issue, num_lines = nil)
+  def print_issue_formatted(issue, head: nil, separator: false, fn: :dim)
     issue => {
       key:,
       fields: { summary:, status:, creator:, assignee:, description:, updated:, created: }
@@ -169,9 +167,10 @@ class JiraFzf
           format_time(updated).magenta,
           creator&.fetch(:name)&.blue,
           assignee&.fetch(:name)&.cyan].compact.join(' ╱ ')
+    puts SEPARATOR if separator
     if description
-      lines = description.lines.map { _1.chomp.dim }
-      lines = lines.take(num_lines) if num_lines
+      lines = description.lines.map { _1.chomp.send(fn) }
+      lines = lines.take(head) if head
       print lines.join("\n")
     end
   end
