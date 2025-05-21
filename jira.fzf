@@ -58,13 +58,10 @@ class JiraFzf
       opts.on('--limit=MAX_ITEMS', 'Maximum number of items to fetch') do |v|
         @options[:limit] = [0, v.to_i].max
       end
-      opts.on('--limit=MAX_ITEMS', 'Maximum number of items to fetch') do |v|
-        @options[:limit] = [0, v.to_i].max
-      end
       opts.on('--print=ISSUE', '(for preview) Print issue description and comments') do |v|
         @options[:print] = v
       end
-      opts.on('--no-color', 'Disable colored output') do |v|
+      opts.on('--no-color', 'Disable colored output') do
         @options[:color] = false
       end
       opts.parse!
