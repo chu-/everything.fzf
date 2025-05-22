@@ -123,6 +123,14 @@ usage: kube.fzf [p|d|j|cj|sc|sn]
 * Select known hosts to open SSH connections to them in a tiled tmux split
   panes
 
+### [_wiki_](https://www.atlassian.com/software/confluence)[.fzf](wiki.fzf)
+
+* Browse recently viewed and modified pages in Confluence wiki
+  ```
+  Usage: wiki.fzf URL
+      -u, --user={USER:PASSWORD,PAT}   User name and password (user:password) or PAT
+  ```
+
 What else?
 ----------
 
