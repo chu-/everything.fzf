@@ -153,8 +153,6 @@ module ChromeFzf
     end
   end
 
-  private
-
   def to_unix(time)
     time.to_i / 1_000_000 - 11_644_473_600
   end

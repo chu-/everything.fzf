@@ -77,7 +77,8 @@ class JiraFzf
     @headers = {
       'Content-Type' => 'application/json',
       'Authorization' =>
-        case @options[:auth].to_s
+        case @options[:auth]
+        when nil then nil
         when /:/ then "Basic #{Base64.encode64(@options[:auth])}"
         else "Bearer #{@options[:auth]}"
         end
@@ -116,7 +117,7 @@ class JiraFzf
 
   def print_issue(id)
     issue = get_path("/rest/api/2/issue/#{id}")
-    print_issue_formatted(issue, separator: true, fn: :itself)
+    print_issue_formatted(issue, separator: true, fun: :itself)
     puts
   end
 
@@ -128,7 +129,7 @@ class JiraFzf
         idx += 1
         comment => { author: { displayName: }, body:, created: }
         puts("[#{idx}/#{total}] #{displayName.blue} #{format_time(created).magenta}")
-        puts(body.each_line.map { it.chomp })
+        puts(body.each_line.map(&:chomp))
         puts SEPARATOR
       end
     end
@@ -154,7 +155,7 @@ class JiraFzf
     CMD
   end
 
-  def print_issue_formatted(issue, head: nil, separator: false, fn: :dim)
+  def print_issue_formatted(issue, head: nil, separator: false, fun: :dim)
     issue => {
       key:,
       fields: { summary:, status:, creator:, assignee:, description:, updated:, created: }
@@ -165,11 +166,11 @@ class JiraFzf
           creator&.fetch(:name)&.blue,
           assignee&.fetch(:name)&.cyan].compact.join(' ╱ ')
     puts SEPARATOR if separator
-    if description
-      lines = description.lines.map { _1.chomp.send(fn) }
-      lines = lines.take(head) if head
-      print lines.join("\n")
-    end
+    return unless description
+
+    lines = description.lines.map { _1.chomp.send(fun) }
+    lines = lines.take(head) if head
+    print lines.join("\n")
   end
 
   def format_time(time)
