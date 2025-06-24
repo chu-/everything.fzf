@@ -113,6 +113,8 @@ usage: kube.fzf [p|d|j|cj|sc|sn]
 ### [_pr_](https://docs.github.com/en/pull-requests)[.fzf](pr.fzf)
 
 * Check out a GitHub pull request
+* Press `CTRL-V` to view the pull request in Vim
+* Press `CTRL-O` to open the pull request in your browser
 
 ### [_rg_](https://github.com/BurntSushi/ripgrep)[.fzf](rg.fzf)
 
