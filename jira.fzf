@@ -151,7 +151,9 @@ class JiraFzf
           --bind ctrl-/:toggle-preview \\
           --bind 'enter:execute-silent(for key in {+1}; do open #{@url}/browse/$key; done)+clear-selection' \\
           --bind 'ctrl-y:execute-silent(echo -n {+1} | pbcopy)+clear-selection+bell' \\
-          --bind 'ctrl-v:execute:ruby #{__FILE__.shellescape} #{auth} #{@url} --print={1} --no-color | view - --not-a-term +"setf jira"'
+          --bind 'ctrl-v:execute:ruby #{__FILE__.shellescape} #{auth} #{@url} --print={1} --no-color | view - --not-a-term +"setf jira"' \\
+          --bind 'result:bg-transform-footer:[[ $FZF_MATCH_COUNT -gt 0 ]] && sort {*f2} | uniq -c | sort -nrk2' \\
+          --with-shell 'bash -c'
     CMD
   end
 
