@@ -29,12 +29,12 @@ require 'time'
 require 'json'
 require 'net/http'
 require 'open3'
-require 'base64'
 require 'shellwords'
 
 gemfile do
   source 'https://rubygems.org'
   gem 'ansi256'
+  gem 'base64'
 end
 
 # Jira meets fzf
