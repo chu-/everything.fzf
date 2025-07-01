@@ -22,10 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-GH_FORCE_TTY=$(tput cols) \
-  fzf --no-height --no-tmux --reverse --header-lines 1 --ansi \
-      --input-border --info inline-right \
-      --bind 'start:reload:gh gist list' \
-      --bind 'enter:execute:gh gist edit {1}' \
-      --preview 'GH_FORCE_TTY=$FZF_PREVIEW_COLUMNS gh gist view {1}' \
-      --preview-window bottom:60%
+fzf --no-height --no-tmux --reverse --with-nth 2.. --ansi \
+    --input-border --info inline-right \
+    --bind $'start:reload:gh gist list | column -t -s "\t"' \
+    --bind 'enter:execute:gh gist edit {1}' \
+    --preview 'GH_FORCE_TTY=$FZF_PREVIEW_COLUMNS gh gist view {1}' \
+    --preview-window bottom:60%
