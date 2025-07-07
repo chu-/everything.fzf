@@ -143,6 +143,7 @@ class JiraFzf
       fzf --ansi --read0 --multi --info inline-right --reverse --scheme history \\
           --highlight-line --height 100% --wrap --wrap-sign '  ↳ ' \\
           --gap --border --border-label " "#{@jql.shellescape}" " \\
+          --tiebreak begin \\
           --header '╱ CTRL-Y: Copy to clipboard ╱ CTRL-V: View ╱ CTRL-/: Toggle preview ╱' \\
           --header-border bottom \\
           --query #{@options[:query].shellescape} \\
