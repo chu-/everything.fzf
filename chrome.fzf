@@ -50,6 +50,9 @@ module ChromeFzf
     else
       ['AppData\Local\Google\Chrome\User Data', 'start {+2}', 'echo {+2} | clip', '']
     end
+  
+  # Allow users to specify their Chrome profile via environment variable
+  CHROME_PROFILE = ENV['CHROME_PROFILE'] || 'Default'
 
   DELIMITER = "\a"
   RS = "\x0"
@@ -70,7 +73,7 @@ module ChromeFzf
 
   private
 
-  def path(name) = File.join(Dir.home, BASE_PATH, 'Default', name)
+  def path(name) = File.join(Dir.home, BASE_PATH, CHROME_PROFILE, name)
 
   # Build fzf command
   def fzf(name)
