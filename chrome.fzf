@@ -79,7 +79,7 @@ module ChromeFzf
   def fzf(name)
     <<~CMD
       fzf --ansi --read0 #{'--multi' unless name == :tabs} --info inline-right --reverse --scheme history \\
-          --header-border --gap \\
+          --header-border --gap --cycle\\
           --highlight-line --height 100% --wrap --wrap-sign ' ↳ ' \\
           --border --border-label " Chrome::#{name.capitalize} " --delimiter "#{DELIMITER}" \\
           --header '╱ CTRL-T: Tabs ╱ CTRL-H: History ╱ CTRL-B: Bookmarks ╱ CTRL-Y: Copy to clipboard ╱' \\
@@ -148,12 +148,13 @@ module ChromeFzf
   end
 
   def tabs
-    `chrome-cli list tablinks`.each_line.filter_map.with_index do |line, idx|
+    tabs_list = `chrome-cli list tablinks`.each_line.filter_map.with_index do |line, idx|
       # [726631302:726631487] title: GitHub, url: https://github.com/
       /^\[(?:[0-9]+:)?([0-9]+)\] title: (.+?), url: (.+?)$/.match(line) do |m|
         [m[2], m[3], idx.succ.to_s, m[1]]
       end
     end
+    tabs_list.reverse
   end
 
   def to_unix(time)
